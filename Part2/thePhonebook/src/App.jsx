@@ -51,30 +51,31 @@ const App = () => {
           setTimeout(() => {
             setNotificationMessage(null)
             setNotificationType(null)
-          }, 5000)
+          }, 90000)
         });
       }
     } else {
       PersonService
       .create(newPerson)
-      .then(setPersons(persons.concat(newPerson)))
+      .then(createdPerson => {
+        setPersons(persons.concat(createdPerson));
+        setNotificationMessage(`${createdPerson.name} was successfully added.`)
+        setNotificationType('succesful')
+        setTimeout(() => {
+          setNotificationMessage(null)
+          setNotificationType(null)
+        }, 90000)
+      })
       .catch(error => {
-        // Handle error
-        console.error('Error creating person:', error);
-        setNotificationMessage(`${existingPerson.name} couldn't be created, please try again.`)
+        setNotificationMessage(`${error.response.data.error}`)
         setNotificationType('error')
         setTimeout(() => {
           setNotificationMessage(null)
           setNotificationType(null)
         }, 5000)
       });
-      setNotificationMessage(`${newPerson.name} was successfully added.`)
-      setNotificationType('succesful')
-      setTimeout(() => {
-        setNotificationMessage(null)
-        setNotificationType(null)
-      }, 5000)
-    }
+  }
+
     setNewName("");
     setNewNumber("");
   };
