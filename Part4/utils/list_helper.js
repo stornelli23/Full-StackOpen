@@ -21,8 +21,6 @@ const dummy = (blogs) => {
     }
   }
 
-  // const _ = require('lodash');
-
   const mostBlogs = (blogs) => {
     if (_.isEmpty(blogs)) {
       return null; 
