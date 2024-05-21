@@ -2,6 +2,7 @@ const Blog = require('../models/blog')
 const app = require('../app');
 const supertest = require('supertest');
 const api = supertest(app);
+const User = require('../models/user')
 
 const initialBlogs = [
     {
@@ -30,8 +31,15 @@ const initialBlogs = [
     return blogs
 }
 
+  const usersInDb = async () => {
+    const users = await User.find({})
+    return users.map(u => u.toJSON())
+  }
+
+
 module.exports = {
     api,
     initialBlogs,
-    blogsInDb
+    blogsInDb,
+    usersInDb
 }
