@@ -16,18 +16,7 @@ blogsRouter.get('/', async (request, response) => {
   
 blogsRouter.post('/', async (request, response) => {
   const { title, author,  url, likes } = request.body;
-
-  const decodedToken = jwt.verify(request.token, process.env.SECRET)
-  
-  // Dentro de la ruta, solo se maneja el caso en que el token es válido pero no contiene el campo id
-  if (!decodedToken.id) {
-    return response.status(401).json({
-      error: 'Token invalid'
-    })
-  }
-
-  const user = await User.findById(decodedToken.id)
-  // const user = await User.findById(userId)
+  const user = request.user
 
   if (!title || !url) {
       return response.status(400).json({ error: 'Title and url are required' });
@@ -82,8 +71,19 @@ blogsRouter.put('/:id', async (request, response) => {
 })
 
 blogsRouter.delete('/:id', async (request, response) => {
-    await Blog.findByIdAndDelete(request.params.id)
-    response.status(204).end()
+  const blog = await Blog.findById(request.params.id)
+  const user = request.user
+
+  if (!blog) {
+    return response.status(404).json({ error: 'Blog not found' });
+  }
+
+  if (blog.user.toString() !== user.id.toString()) {
+    return response.status(403).json({ error: 'Only the creator can delete this blog' });
+  }
+
+  await Blog.findByIdAndDelete(request.params.id)
+  response.status(204).end()
 })
 
 module.exports = blogsRouter
