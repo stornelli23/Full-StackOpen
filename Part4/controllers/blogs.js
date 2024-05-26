@@ -1,6 +1,8 @@
 const blogsRouter = require('express').Router()
 const User = require('../models/user')
 const Blog = require('../models/blog')
+const jwt = require('jsonwebtoken')
+
 
 blogsRouter.get('/', async (request, response) => {
   const blogs = await Blog
@@ -13,9 +15,19 @@ blogsRouter.get('/', async (request, response) => {
   })
   
 blogsRouter.post('/', async (request, response) => {
-  const { title, author, userId,  url, likes } = request.body;
+  const { title, author,  url, likes } = request.body;
 
-  const user = await User.findById(userId)
+  const decodedToken = jwt.verify(request.token, process.env.SECRET)
+  
+  // Dentro de la ruta, solo se maneja el caso en que el token es válido pero no contiene el campo id
+  if (!decodedToken.id) {
+    return response.status(401).json({
+      error: 'Token invalid'
+    })
+  }
+
+  const user = await User.findById(decodedToken.id)
+  // const user = await User.findById(userId)
 
   if (!title || !url) {
       return response.status(400).json({ error: 'Title and url are required' });

@@ -14,6 +14,7 @@ const unknownEndpoint = (request, response) => {
 
 const errorHandler = (error, request, response, next) => {
   logger.error(error.message);
+  logger.error(error.name)
 
   let statusCode = 500;
   let errorMessage = 'Internal Server Error';
@@ -27,16 +28,27 @@ const errorHandler = (error, request, response, next) => {
   } else if (error.name === 'MongoServerError' && error.message.includes('E11000 duplicate key error')) {
     statusCode = 400;
     errorMessage = 'Expected `username` to be unique';
+  } else if (error.name ===  'JsonWebTokenError') {
+    statusCode = 401;
+    errorMessage = 'Token missing or invalid'
   }
-
   response.status(statusCode).json({ error: errorMessage });
 
   // next(error)
+};
+
+const tokenExtractor = (request, response, next) => {
+  const authorization = request.get("authorization");
+  if (authorization && authorization.startsWith("Bearer ")) {
+    request.token = authorization.replace("Bearer ", "");
+  }
+  next();
 };
 
 
 module.exports = {
   requestLogger,
   unknownEndpoint,
-  errorHandler
+  errorHandler,
+  tokenExtractor
 }
