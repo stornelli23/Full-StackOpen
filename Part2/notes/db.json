@@ -19,6 +19,16 @@
       "id": "eb82",
       "content": "Hola, esta es mi nota",
       "important": false
+    },
+    {
+      "id": "7ff2",
+      "content": "hola",
+      "important": false
+    },
+    {
+      "id": "6bb1",
+      "content": "chau",
+      "important": true
     }
   ]
 }
