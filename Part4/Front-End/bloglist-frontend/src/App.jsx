@@ -6,11 +6,13 @@ import loginService from './services/login'
 
 const App = () => {
   const [blogs, setBlogs] = useState([])
-  const [newBlog, setNewBlog] = useState('')
+  const [blogTitle, setBlogTitle] = useState('')
+  const [blogAuthor, setBlogAuthor] = useState('')
+  const [blogURL, setBlogURL] = useState('')
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [user, setUser] = useState(null)
-  const [errorMessage, setErrorMessage] = useState(null)
+  const [notification, setNotification] = useState({ message: '', type: '' })
 
   useEffect(() => {
     blogService.getAll().then(blogs =>
@@ -18,6 +20,9 @@ const App = () => {
     )  
   }, [])
 
+  /* This `useEffect` hook is responsible for checking if there is a logged-in user stored in the
+  browser's local storage. It runs only once when the component mounts (due to the empty dependency
+  array `[]`). */
   useEffect(() => {
     const loggedUserJSON = window.localStorage.getItem('loggedBlogAppUser')
     if (loggedUserJSON) {
@@ -47,29 +52,42 @@ const App = () => {
       setPassword('')
       
     } catch (e) {
-      setErrorMessage("Wrong credentials")
+      setNotification("Wrong credentials")
       setTimeout(()=>{
-        setErrorMessage(null)
+        setNotification(null)
       }, 5000)
       
     }
   }
-  const addBlog = (e) => {
+  
+  const handleBlogTitleChange = (event) => setBlogTitle(event.target.value)
+  const handleBlogAuthorChange = (event) => setBlogAuthor(event.target.value)
+  const handleBlogUrlChange = (event) => setBlogURL(event.target.value)
+
+  const addBlog = async (e) => {
     e.preventDefault();
     const blogObject = {
-      content: newBlog,
-      important: Math.random() > 0.5,
+      title: blogTitle,
+      author: blogAuthor,
+      url: blogURL,
     };
-
-    blogService
-      .create(blogObject)
-      .then(returnedBlog => {
-        setBlogs(blogs.concat(returnedBlog))
-      setNewBlog("");
-    });
-  }
-
-  const handleBlogChange = (event) => setNewBlog(event.target.value)
+  
+    try {
+      const returnedBlog = await blogService.create(blogObject);
+      setBlogs(blogs.concat(returnedBlog));
+      setBlogTitle('');
+      setBlogAuthor('');
+      setBlogURL('');
+      setNotification({ message: `Blog "${returnedBlog.title}" created successfully!`, type: 'success' });
+    } catch (error) {
+      const errorMessage = error.response?.data?.error || 'An error occurred while creating the blog.';
+      setNotification({ message: errorMessage, type: 'error' });
+    } finally {
+      setTimeout(() => {
+        setNotification({ message: '', type: '' });
+      }, 5000);
+    }
+  };
 
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogAppUser'); 
@@ -103,28 +121,35 @@ const App = () => {
   )
 
 
-  const renderCreateBlogForm = () =>( 
-  <form onSubmit={addBlog}>
-    <input
-      placeholder='Create a new blog here...'
-      value={newBlog}
-      onChange={handleBlogChange}
-    />
-    <button type="submit">save</button>
-  </form>  
-  )
+  const renderCreateBlogForm = () => (
+    <form onSubmit={addBlog}>
+      <legend>CREATE NEW BLOG</legend>
+        <label>Title </label>
+        <input value={blogTitle} onChange={handleBlogTitleChange} />
+        <br />
+        <label>Author </label>
+        <input value={blogAuthor} onChange={handleBlogAuthorChange} />
+        <br />
+        <label>URL </label>
+        <input value={blogURL} onChange={handleBlogUrlChange} />
+        <br />
+        <button type="submit">Create</button>
+    </form>
+  );
    
 
   return (
     <div>
       <h2>blogs</h2>
-      <Notification message={errorMessage}/>
+
+      {notification.message && <Notification message={notification.message} type={notification.type} />}
+
         
       {user === null ?
       renderLoginForm() :
       <div>
-        <p>{user.name} logged-in</p>
-        <button onClick={handleLogout}>logout</button>
+          <p>{user.name} logged-in  <button onClick={handleLogout}>logout</button></p>
+        
         {renderCreateBlogForm()}
           <div>
             {blogs.map(blog =>
