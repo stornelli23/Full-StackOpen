@@ -78,6 +78,15 @@ const App = () => {
     }
   };
 
+  const updateBlog = (updatedBlog) => {
+    setBlogs((prevBlogs) =>
+      prevBlogs.map((blog) =>
+        blog.id === updatedBlog.id ? updatedBlog : blog
+      )
+    );
+  };
+  
+
   const handleLogout = () => {
     window.localStorage.removeItem('loggedBlogAppUser'); 
     setUser(null); 
@@ -128,7 +137,7 @@ const App = () => {
         
           <div>
             {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} />
+            <Blog key={blog.id} blog={blog} updateBlog={updateBlog}/>
             )}
           </div>
       </div>
