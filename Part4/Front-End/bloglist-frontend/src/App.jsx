@@ -65,7 +65,13 @@ const App = () => {
     
     try {
       const returnedBlog = await blogService.create(blogObject);
-      setBlogs(blogs.concat(returnedBlog));
+      
+      setBlogs((prevBlogs) => [...prevBlogs, returnedBlog])
+      // Esto asegura que el nuevo blog creado (returnedBlog) se agregue al estado blogs local de inmediato. En lugar de esperar que los blogs se recarguen desde el servidor, simplemente actualizas el estado blogs en el frontend.
+      // Obtener los blogs actualizados desde el backend
+      const allBlogs = await blogService.getAll();
+      setBlogs(allBlogs);  // Actualiza el estado con los blogs más recientes
+
       setNotification({ message: `Blog "${returnedBlog.title}" created successfully!`, type: 'success' });
       blogFormRef.current.toggleVisibility()
     } catch (error) {
@@ -84,6 +90,10 @@ const App = () => {
         blog.id === updatedBlog.id ? updatedBlog : blog
       )
     );
+  };
+  
+  const deleteBlog = (deletedBlogId) => {
+    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== deletedBlogId));
   };
   
 
@@ -123,29 +133,37 @@ const App = () => {
     <div>
       <h2>blogs</h2>
 
-      {notification.message && <Notification message={notification.message} type={notification.type} />}
+      {notification.message && (
+        <Notification message={notification.message} type={notification.type} />
+      )}
 
-        
-      {user === null ?
-      renderLoginForm() :
-      <div>
-          <p>{user.name} logged-in  <button onClick={handleLogout}>logout</button></p>
+      {user === null ? (
+        renderLoginForm()
+      ) : (
+        <div>
+          <p>
+            {user.name} logged-in <button onClick={handleLogout}>logout</button>
+          </p>
 
-        <Togglable buttonLabel='Create a new blog' ref={blogFormRef}>
-          <CreateBlogForm createBlog={addBlog}/>
-        </Togglable>
-        
+          <Togglable buttonLabel="Create a new blog" ref={blogFormRef}>
+            <CreateBlogForm createBlog={addBlog} />
+          </Togglable>
+
           <div>
-            {blogs.map(blog =>
-            <Blog key={blog.id} blog={blog} updateBlog={updateBlog}/>
-            )}
+            { [...blogs].sort((a, b) => b.likes - a.likes).map((blog) => (
+              <Blog 
+                key={blog.id} 
+                blog={blog} 
+                updateBlog={updateBlog}
+                deleteBlog={deleteBlog}
+                user={user}
+              />
+            ))}
           </div>
-      </div>
-    }
-      
-
+        </div>
+      )}
     </div>
-  )
+  );
 }
 
 export default App

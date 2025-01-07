@@ -1,7 +1,7 @@
 import { useState } from "react";
 import blogService from '../services/blogs'
 
-const Blog = ({ blog, updateBlog }) => {
+const Blog = ({ blog, updateBlog, user, deleteBlog }) => {
   const [visible, setVisible] = useState(false);
 
   const toggleVisibility = () => setVisible(!visible);
@@ -34,6 +34,18 @@ const Blog = ({ blog, updateBlog }) => {
 
   }
 
+  const handleDeleteBlog = async (e) => {
+    e.preventDefault()
+    const confirmed = window.confirm(`Are you sure you want to delete the blog "${blog.title}"?`)
+    if (!confirmed) return
+    try {
+      await blogService.deleteBlog(blog.id); 
+      deleteBlog(blog.id); 
+    } catch (error) {
+      console.error("Error deleting blog:", error);
+    }
+  };
+
   return (
     <div style={blogStyle}>
       {blog.title}
@@ -52,6 +64,8 @@ const Blog = ({ blog, updateBlog }) => {
           <li>{blog.author}</li>
         </ul>
       )}
+      {user.username === blog.user.username && <button onClick={handleDeleteBlog}>Delete blog</button>}
+      
     </div>
   );
 };
