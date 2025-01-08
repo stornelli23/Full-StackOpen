@@ -18,7 +18,7 @@ const App = () => {
   useEffect(() => {
     blogService.getAll().then(blogs =>
       setBlogs( blogs )
-    )  
+    )
   }, [])
 
   /* This `useEffect` hook is responsible for checking if there is a logged-in user stored in the
@@ -39,95 +39,95 @@ const App = () => {
     e.preventDefault()
 
     try {
-      const user = await loginService.login({username, password})
+      const user = await loginService.login({ username, password })
 
-     /*storing the user object in the browser's local storage. */
+      /*storing the user object in the browser's local storage. */
       window.localStorage.setItem(
         'loggedBlogAppUser', JSON.stringify(user)
-      ) 
+      )
 
       blogService.setToken(user.token)
       // console.log('Token set:', user.token)
       setUser(user)
       setUsername('')
       setPassword('')
-      
+
     } catch (e) {
-      setNotification("Wrong credentials")
-      setTimeout(()=>{
+      setNotification('Wrong credentials')
+      setTimeout(() => {
         setNotification(null)
       }, 5000)
-      
+
     }
   }
-  
+
   const addBlog = async (blogObject) => {
-    
+
     try {
-      const returnedBlog = await blogService.create(blogObject);
-      
+      const returnedBlog = await blogService.create(blogObject)
+
       setBlogs((prevBlogs) => [...prevBlogs, returnedBlog])
       // Esto asegura que el nuevo blog creado (returnedBlog) se agregue al estado blogs local de inmediato. En lugar de esperar que los blogs se recarguen desde el servidor, simplemente actualizas el estado blogs en el frontend.
       // Obtener los blogs actualizados desde el backend
-      const allBlogs = await blogService.getAll();
-      setBlogs(allBlogs);  // Actualiza el estado con los blogs más recientes
+      const allBlogs = await blogService.getAll()
+      setBlogs(allBlogs)  // Actualiza el estado con los blogs más recientes
 
-      setNotification({ message: `Blog "${returnedBlog.title}" created successfully!`, type: 'success' });
+      setNotification({ message: `Blog "${returnedBlog.title}" created successfully!`, type: 'success' })
       blogFormRef.current.toggleVisibility()
     } catch (error) {
-      const errorMessage = error.response?.data?.error || 'An error occurred while creating the blog.';
-      setNotification({ message: errorMessage, type: 'error' });
+      const errorMessage = error.response?.data?.error || 'An error occurred while creating the blog.'
+      setNotification({ message: errorMessage, type: 'error' })
     } finally {
       setTimeout(() => {
-        setNotification({ message: '', type: '' });
-      }, 5000);
+        setNotification({ message: '', type: '' })
+      }, 5000)
     }
-  };
+  }
 
   const updateBlog = (updatedBlog) => {
     setBlogs((prevBlogs) =>
       prevBlogs.map((blog) =>
         blog.id === updatedBlog.id ? updatedBlog : blog
       )
-    );
-  };
-  
+    )
+  }
+
   const deleteBlog = (deletedBlogId) => {
-    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== deletedBlogId));
-  };
-  
+    setBlogs((prevBlogs) => prevBlogs.filter((blog) => blog.id !== deletedBlogId))
+  }
+
 
   const handleLogout = () => {
-    window.localStorage.removeItem('loggedBlogAppUser'); 
-    setUser(null); 
-    blogService.setToken(null); 
-  };
-  
+    window.localStorage.removeItem('loggedBlogAppUser')
+    setUser(null)
+    blogService.setToken(null)
+  }
 
-  const renderLoginForm = ()=>(
+
+  const renderLoginForm = () => (
     <form onSubmit={handleLogin}>
-    <div>
+      <div>
       username
         <input
-        type="text"
-        value={username}
-        name="Username"
-        onChange={({ target }) => setUsername(target.value)}
-      />
-    </div>
-    <div>
+          type="text"
+          value={username}
+          name="Username"
+          onChange={({ target }) => setUsername(target.value)}
+        />
+      </div>
+      <div>
       password
         <input
-        type="password"
-        value={password}
-        name="Password"
-        onChange={({ target }) => setPassword(target.value)}
-      />
-    </div>
-    <button type="submit">login</button>
-  </form>
+          type="password"
+          value={password}
+          name="Password"
+          onChange={({ target }) => setPassword(target.value)}
+        />
+      </div>
+      <button type="submit">login</button>
+    </form>
   )
-   
+
 
   return (
     <div>
@@ -151,9 +151,9 @@ const App = () => {
 
           <div>
             { [...blogs].sort((a, b) => b.likes - a.likes).map((blog) => (
-              <Blog 
-                key={blog.id} 
-                blog={blog} 
+              <Blog
+                key={blog.id}
+                blog={blog}
                 updateBlog={updateBlog}
                 deleteBlog={deleteBlog}
                 user={user}
@@ -163,7 +163,7 @@ const App = () => {
         </div>
       )}
     </div>
-  );
+  )
 }
 
 export default App

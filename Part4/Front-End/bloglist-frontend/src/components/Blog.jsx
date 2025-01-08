@@ -1,20 +1,19 @@
-import { useState } from "react";
+import { useState } from 'react'
 import blogService from '../services/blogs'
 
 const Blog = ({ blog, updateBlog, user, deleteBlog }) => {
-  const [visible, setVisible] = useState(false);
+  const [visible, setVisible] = useState(false)
 
-  const toggleVisibility = () => setVisible(!visible);
-
+  const toggleVisibility = () => setVisible(!visible)
   const blogStyle = {
     paddingTop: 10,
     paddingLeft: 2,
-    border: "solid",
+    border: 'solid',
     borderWidth: 1,
     marginBottom: 5,
-  };
+  }
 
-  const handleLikeButton = async (e) =>{
+  const handleLikeButton = async (e) => {
     e.preventDefault()
     let currentBlog = {
       title: blog.title,
@@ -24,12 +23,12 @@ const Blog = ({ blog, updateBlog, user, deleteBlog }) => {
       user: blog.user.id
     }
     try {
-      
+
       const updatedBlog = await blogService.update(blog.id, currentBlog)
       updateBlog(updatedBlog)
-      
+
     } catch (error) {
-      console.error('Error updating likes:', error);
+      console.error('Error updating likes:', error)
     }
 
   }
@@ -39,12 +38,12 @@ const Blog = ({ blog, updateBlog, user, deleteBlog }) => {
     const confirmed = window.confirm(`Are you sure you want to delete the blog "${blog.title}"?`)
     if (!confirmed) return
     try {
-      await blogService.deleteBlog(blog.id); 
-      deleteBlog(blog.id); 
+      await blogService.deleteBlog(blog.id)
+      deleteBlog(blog.id)
     } catch (error) {
-      console.error("Error deleting blog:", error);
+      console.error('Error deleting blog:', error)
     }
-  };
+  }
 
   return (
     <div style={blogStyle}>
@@ -60,14 +59,14 @@ const Blog = ({ blog, updateBlog, user, deleteBlog }) => {
           <li>
             {blog.likes}
             <button onClick={handleLikeButton}>like</button>
-            </li>
+          </li>
           <li>{blog.author}</li>
         </ul>
       )}
       {user.username === blog.user.username && <button onClick={handleDeleteBlog}>Delete blog</button>}
-      
-    </div>
-  );
-};
 
-export default Blog;
+    </div>
+  )
+}
+
+export default Blog
