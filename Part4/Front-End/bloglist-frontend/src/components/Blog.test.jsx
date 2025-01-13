@@ -19,40 +19,40 @@ test('render a blog', () => {
 
   render(<Blog blog={blog} user={user}/>)
 
-
+//   screen.debug()
   const element = screen.getByText('Nuevo blog de test')
   expect(element).toBeDefined()
 
 })
 
-test('clicking the button calls event handler once', async () => {
+test('shows URL and likes when the "View" button is clicked', async () => {
   const blog = {
-    title: 'Nuevo blog de test',
-    author: 'Santiago',
-    url:'aa.com',
-    user: 'santiag0',
-    likes: 2
-  }
+    title: 'Test Blog',
+    author: 'Test Author',
+    url: 'http://testblog.com',
+    likes: 42,
+    user: { username: 'testuser' }
+  };
 
-  const blogUser = {
-    username: 'santiag0',
-    name: 'Santiago Enzo'
-  }
+  const user = { username: 'testuser' };
 
-  const mockHandler = vi.fn()
+  render(<Blog blog={blog} user={user} />);
 
-  render(
-    <Blog blog={blog} user={blogUser}/>
-  )
+  // Verifica que la URL y los likes no están visibles inicialmente
+  expect(screen.queryByText(blog.url)).not.toBeInTheDocument();
+  expect(screen.queryByText(`42`)).not.toBeInTheDocument();
 
-  const user = userEvent.setup()
-  const button = screen.getByText('View')
-  // Antes de hacer clic, los detalles no deben estar visibles
-  expect(screen.queryByText('aa.com')).to.be.null
+  // Hace clic en el botón "View"
+  const viewButton = screen.getByText('View');
+  const userAction = userEvent.setup();
+  await userAction.click(viewButton);
 
-  // Hacer clic en el botón "View"
-  await user.click(button)
+  // Verifica que la URL y los likes están visibles
+  expect(screen.getByText(blog.url)).toBeInTheDocument();
+  expect(screen.getByText(`42`)).toBeInTheDocument();
+});
 
-  // Después del clic, los detalles deben ser visibles
-  expect(screen.queryByText('aa.com')).to.exist
-})
+// FALTA ESTE EJERCICIO.
+// 5.15: Blog List Tests, step 3
+// Make a test, which ensures that if the like button is clicked twice, the event 
+// handler the component received as props is called twice.
