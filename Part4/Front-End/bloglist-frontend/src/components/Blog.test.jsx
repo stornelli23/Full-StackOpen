@@ -1,7 +1,8 @@
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import Blog from './Blog'
-import { expect } from 'vitest'
+import { expect, test, vi } from 'vitest'
+import blogService from '../services/blogs'
 
 test('render a blog', () => {
   const blog = {
@@ -50,6 +51,47 @@ test('shows URL and likes when the "View" button is clicked', async () => {
   // Verifica que la URL y los likes están visibles
   expect(screen.getByText(blog.url)).toBeInTheDocument();
   expect(screen.getByText(`42`)).toBeInTheDocument();
+});
+
+vi.mock('../services/blogs'); // Mock completo de blogService
+
+test('if the like button is clicked twice, the event handler is called twice', async () => {
+  const blog = {
+    id: '123',
+    title: 'Test Blog',
+    author: 'Test Author',
+    url: 'http://testblog.com',
+    likes: 42,
+    user: { username: 'testuser' },
+  };
+
+  const user = { username: 'testuser' };
+  const updateBlog = vi.fn(); // Mock de la función updateBlog
+
+  // Mock de blogService.update para que no interfiera en el test
+  blogService.update.mockResolvedValue({
+    ...blog,
+    likes: blog.likes + 1,
+  });
+
+  render(<Blog blog={blog} user={user} updateBlog={updateBlog} />);
+
+  const userAction = userEvent.setup();
+
+  // Clic en "View" para mostrar el botón de "like"
+  const viewButton = screen.getByText('View');
+  await userAction.click(viewButton);
+
+  // Clic en el botón "like" dos veces
+  const likeButton = screen.getByRole('button', { name: /like/i });
+  await userAction.click(likeButton);
+  await userAction.click(likeButton);
+
+  // Asegúrate de que updateBlog se llama dos veces
+  expect(updateBlog).toHaveBeenCalledTimes(2);
+
+  // Opcional: Verifica los argumentos con los que se llama updateBlog
+  expect(updateBlog).toHaveBeenCalledWith(expect.objectContaining({ likes: 43 }));
 });
 
 // FALTA ESTE EJERCICIO.
